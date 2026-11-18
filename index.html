@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>College Football Explorer</title>
+<meta name="description" content="Explore college football polls and season award winners from a live Supabase database.">
+<style>
+:root{--ink:#142a23;--muted:#53665d;--green:#164e39;--gold:#dbb66b;--paper:#f4f3ed;--line:#d9dfd6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}header{background:#102e24;color:white;padding:25px max(24px,calc((100vw - 1180px)/2));border-bottom:4px solid var(--gold)}.brand{display:flex;justify-content:space-between;align-items:center;gap:20px}.brand strong{letter-spacing:.14em;font-size:12px}.pill{font-size:12px;border:1px solid #809b8a;padding:6px 12px;border-radius:20px;color:#d5e5da}h1{font-size:clamp(32px,5vw,58px);line-height:1.08;letter-spacing:-.045em;margin:34px 0 14px;font-family:Georgia,serif;font-weight:normal}header p{color:#c5d5ca;max-width:680px;margin:0 0 20px}main{max-width:1228px;margin:auto;padding:28px 24px 50px}.controls{display:flex;align-items:end;gap:18px;background:white;border:1px solid var(--line);border-radius:12px;padding:22px;flex-wrap:wrap}label{display:block;font-size:12px;font-weight:700;letter-spacing:.05em;margin-bottom:7px;text-transform:uppercase}select,input,button{font:inherit;border:1px solid #afbeb3;border-radius:6px;padding:11px 13px;background:white;color:var(--ink)}select{min-width:170px}#pollSelect{min-width:285px}button{cursor:pointer;background:var(--green);color:white;font-weight:600;border-color:var(--green)}button:hover{background:#226348}button:disabled,select:disabled{opacity:.55;cursor:not-allowed}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #b88c39;outline-offset:3px}.connection{font-size:13px;color:var(--muted);margin:14px 0 24px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}.dot{width:8px;height:8px;border-radius:50%;background:#8d998f;display:inline-block}.dot.live{background:#237c4b}#notice{background:#fff6df;border:1px solid #d9bf7d;border-radius:8px;padding:16px 20px;margin:18px 0}#notice[hidden]{display:none}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0}.stat{padding:18px 22px;background:#e9eee7;border:1px solid var(--line);border-radius:9px}.stat small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}.stat b{display:block;font-size:25px;margin-top:4px}.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(290px,1fr);gap:22px;align-items:start}.panel{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden}.heading{padding:23px 24px 17px}.heading h2{margin:0 0 4px;font-family:Georgia,serif;font-size:27px;font-weight:normal}.heading p{margin:0;color:var(--muted);font-size:13px}.search{padding:0 24px 18px}.search input{width:100%;font-size:14px}.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}th{background:#eef2ec;text-align:left;padding:12px 15px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}td{padding:13px 15px;border-bottom:1px solid #e9ede6}td:first-child{font-weight:700;color:var(--green)}td:nth-child(2){font-weight:600}tbody tr:hover{background:#f4f7f1}.numeric{text-align:right;font-variant-numeric:tabular-nums}.empty{padding:28px 24px;color:var(--muted);font-size:14px}.awards{padding:0 24px 12px}.award{border-top:1px solid var(--line);padding:20px 0}.award small{color:#7a591c;text-transform:uppercase;font-weight:700;letter-spacing:.06em;font-size:11px}.award h3{font-size:20px;margin:6px 0 2px}.award p{font-size:14px;color:var(--muted);margin:0}.footnote{padding:14px 24px;color:var(--muted);font-size:12px}details{margin-top:24px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px 22px}summary{cursor:pointer;font-weight:600}details p{font-size:14px;color:var(--muted)}pre{overflow:auto;background:#102e24;color:#d7e7dc;padding:20px;border-radius:8px;font-size:12px;line-height:1.7}footer{margin-top:28px;display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted)}@media(max-width:850px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:15px}.stat b{font-size:20px}}@media(max-width:520px){main{padding:18px 14px}.controls{padding:16px}.controls>div,select,#pollSelect{width:100%;min-width:0}.stats{grid-template-columns:1fr}.brand{align-items:start}.pill{white-space:nowrap}footer{display:block}}
+</style>
+</head>
+<body>
+<header><div class="brand"><strong>COLLEGE FOOTBALL / EXPLORER</strong><span class="pill">Rankings &amp; awards</span></div><h1>Every season has a story.</h1><p>Explore the polls. Compare the seasons. Discover the players behind college football’s individual awards.</p></header>
+<main>
+<section class="controls" aria-label="Select rankings"><div><label for="seasonSelect">Season</label><select id="seasonSelect" disabled><option>Loading seasons…</option></select></div><div><label for="pollSelect">Poll edition</label><select id="pollSelect" disabled><option>Select a season</option></select></div><button id="refresh" type="button">Refresh live data</button></section>
+<div class="connection" role="status" aria-live="polite"><span class="dot" id="dot"></span><span id="connection">Connecting to Supabase…</span></div>
+<div id="notice" role="alert" hidden></div>
+<section class="stats" aria-label="Selected poll summary"><div class="stat"><small>Number one</small><b id="leader">—</b></div><div class="stat"><small>Ranked teams in poll</small><b id="teamCount">—</b></div><div class="stat"><small>Published</small><b id="published">—</b></div></section>
+<div class="layout"><section class="panel" aria-labelledby="rankingTitle"><div class="heading"><h2 id="rankingTitle">The rankings</h2><p id="pollDescription">Select an available poll to explore its rankings.</p></div><div class="search"><label for="teamSearch">Find a team in this poll</label><input id="teamSearch" type="search" placeholder="Search team name…" autocomplete="off"></div><div class="scroll"><table><thead><tr><th scope="col">Rank</th><th scope="col">Team</th><th scope="col" class="numeric">Points</th><th scope="col" class="numeric">1st votes</th><th scope="col">Record</th></tr></thead><tbody id="rankings"></tbody></table></div><div id="rankingEmpty" class="empty">Waiting for live data.</div><div class="footnote">Tied ranks are preserved. A dash means the value was not recorded.</div></section>
+<aside class="panel" aria-labelledby="awardTitle"><div class="heading"><h2 id="awardTitle">Season honors</h2><p id="awardDescription">Individual awards for the selected season.</p></div><div class="awards" id="awards"></div><div id="awardEmpty" class="empty">Waiting for live data.</div><div class="footnote">Awards apply to the season, independent of the selected poll. Position is the player’s primary college position.</div></aside></div>
+<details><summary>About the data &amp; SQL</summary><p id="coverage">Coverage is determined by the records available in the connected database.</p><p>All displayed results are fetched live from Supabase. No sample results are substituted if the connection fails. Final polls may be published in January of the following calendar year.</p><p>The query below joins seasons, polls, rankings, and teams. It filters to the selected poll and preserves the original rank values. Run it in Supabase’s SQL Editor for the demo.</p><button id="copySql" type="button">Copy selected-poll SQL</button><pre id="sql">Select a poll to generate the query.</pre></details>
+<footer><span>Shane Hawkins · ACC 556 · Application prototype</span><span>College Football Rankings &amp; Awards</span></footer>
+</main>
+<script>
+'use strict';
+// A publishable key is intended for browser use. Database policies control access.
+// Never substitute a secret key or a service-role key here.
+const SUPABASE_URL='https://ysejlbfajozapmspymyy.supabase.co';
+const SUPABASE_KEY='sb_publishable_ykoQYzkDJBYtYTqaxilnhg_OemDXI95';
+const $=id=>document.getElementById(id);
+let seasons=[], polls=[], rankings=[], loadVersion=0, seasonVersion=0, pollVersion=0;
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const display=value=>value===null||value===undefined?'—':String(value);
+const dateText=value=>value?new Date(value+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+function notice(message){$('notice').textContent=message;$('notice').hidden=!message;}
+function status(message,live=false){$('connection').textContent=message;$('dot').classList.toggle('live',live);}
+async function get(table,params){
+ const result=[];
+ for(let offset=0;;offset+=500){
+  const query=new URLSearchParams({...params,limit:'500',offset:String(offset)});
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);
+  let response;
+  try{response=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`,{headers:{apikey:SUPABASE_KEY},signal:controller.signal,cache:'no-store'});}finally{clearTimeout(timer);}
+  if(!response.ok)throw new Error(`Could not read ${table} (HTTP ${response.status}). Check the project’s Data API permissions and policies.`);
+  const rows=await response.json();if(!Array.isArray(rows))throw new Error('Unexpected database response.');
+  result.push(...rows);if(rows.length<500)return result;
+ }
+}
+function fail(error){notice(error.name==='AbortError'?'The database request timed out. Please try Refresh live data.':error.message||'Unable to load data. Please try again.');status('Data unavailable · refresh to retry');}
+function resetRanks(message='Loading rankings…'){
+ rankings=[];$('rankings').innerHTML='';$('rankingEmpty').textContent=message;$('rankingEmpty').hidden=false;
+ $('leader').textContent='—';$('teamCount').textContent='—';$('published').textContent='—';$('sql').textContent='Select a poll to generate the query.';
+}
+function renderRanks(){
+ const search=$('teamSearch').value.trim().toLowerCase();
+ const visible=rankings.filter(r=>(r.team?.team_name||'').toLowerCase().includes(search));
+ $('rankings').innerHTML=visible.map(r=>{let record=r.wins==null||r.losses==null?'—':`${r.wins}–${r.losses}${r.ties?`–${r.ties}`:''}`;return `<tr><td>${esc(r.rank)}</td><td>${esc(r.team?.team_name||'Unknown team')}</td><td class="numeric">${esc(display(r.points))}</td><td class="numeric">${esc(display(r.first_place_votes))}</td><td>${esc(record)}</td></tr>`;}).join('');
+ $('rankingEmpty').hidden=visible.length>0;$('rankingEmpty').textContent=rankings.length?'No teams match your search.':'No ranking records are available for this poll.';
+}
+function renderAwards(rows){
+ $('awards').innerHTML=rows.map(r=>`<article class="award"><small>${esc(r.award?.award_name||'Award')}</small><h3>${esc(r.player?.player_name||'Unknown player')}</h3><p>${esc(r.team?.team_name||'Unknown team')}${r.player?.position?' · '+esc(r.player.position):''}</p></article>`).join('');
+ $('awardEmpty').hidden=rows.length>0;$('awardEmpty').textContent='No award winners are available for this season.';
+}
+async function selectPoll(){
+ const version=++pollVersion;const seasonToken=seasonVersion;
+ const poll=polls.find(p=>String(p.poll_id)===$('pollSelect').value);resetRanks();
+ if(!poll){resetRanks('No polls are available for this season.');return;}
+ status('Loading selected poll…');notice('');
+ $('pollDescription').textContent=`${poll.poll_type} · ${poll.is_final?'Final poll':poll.week_number===0?'Preseason':'Week '+poll.week_number}`;
+ try{
+  const rows=await get('ranking',{select:'rank,points,first_place_votes,wins,losses,ties,team:team(team_name)',poll_id:`eq.${poll.poll_id}`,order:'rank.asc,team_id.asc'});
+  if(version!==pollVersion||seasonToken!==seasonVersion)return;
+  rankings=rows;renderRanks();$('teamCount').textContent=rows.length;
+  $('leader').textContent=rows.filter(r=>r.rank===1).map(r=>r.team?.team_name).filter(Boolean).join(' / ')||'—';$('published').textContent=dateText(poll.poll_date);
+  $('sql').textContent=`SELECT s.year AS season, p.poll_type, p.poll_date,\n       r.rank, t.team_name, r.points,\n       r.first_place_votes, r.wins, r.losses, r.ties\nFROM public.ranking AS r\nJOIN public.poll AS p ON p.poll_id = r.poll_id\nJOIN public.season AS s ON s.season_id = p.season_id\nJOIN public.team AS t ON t.team_id = r.team_id\nWHERE p.poll_id = ${Number(poll.poll_id)}\nORDER BY r.rank, t.team_name;`;
+  status('Live Supabase response · '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'}),true);
+ }catch(error){if(version===pollVersion&&seasonToken===seasonVersion){resetRanks('Rankings could not be loaded.');fail(error);}}
+}
+async function selectSeason(){
+ const version=++seasonVersion;++pollVersion;const id=$('seasonSelect').value;
+ polls=[];resetRanks();$('teamSearch').value='';$('awards').innerHTML='';$('awardEmpty').hidden=false;$('awardEmpty').textContent='Loading award winners…';
+ $('pollSelect').disabled=true;$('pollSelect').innerHTML='<option>Loading polls…</option>';notice('');status('Loading season…');
+ const year=seasons.find(s=>String(s.season_id)===id)?.year;$('awardDescription').textContent=`${year} season · individual award winners`;
+ try{
+  const [editions,winners]=await Promise.all([
+   get('poll',{select:'poll_id,poll_type,week_number,poll_date,is_final',season_id:`eq.${id}`,order:'poll_date.desc,poll_id.asc'}),
+   get('award_winner',{select:'award_winner_id,award:award(award_name),player:player(player_name,position),team:team(team_name)',season_id:`eq.${id}`,order:'award_id.asc,award_winner_id.asc'})
+  ]);
+  if(version!==seasonVersion)return;
+  polls=editions;renderAwards(winners);
+  $('pollSelect').innerHTML=editions.length?editions.map(p=>`<option value="${p.poll_id}">${esc(p.poll_type)} · ${p.is_final?'Final':p.week_number===0?'Preseason':'Week '+esc(p.week_number)} · ${esc(dateText(p.poll_date))}</option>`).join(''):'<option>No polls available</option>';
+  $('pollSelect').disabled=!editions.length;
+  $('coverage').textContent=`Loaded seasons: ${seasons.map(s=>s.year).join(', ')}. This season has ${editions.length} available poll edition${editions.length===1?'':'s'}. ${editions.length&&editions.every(p=>p.is_final)?'Only final polls are currently available for this season. Weekly coverage has not been loaded.':'The selector lists only editions stored in the database.'}`;
+  if(editions.length)await selectPoll();else{resetRanks('No polls are available for this season.');status('Connected to Supabase · no polls for this season',true);}
+ }catch(error){if(version===seasonVersion){$('pollSelect').innerHTML='<option>Polls unavailable</option>';$('awardEmpty').textContent='Season data could not be loaded.';resetRanks('Season data could not be loaded.');fail(error);}}
+}
+async function initialize(){
+ const version=++loadVersion;++seasonVersion;++pollVersion;
+ const previous=$('seasonSelect').value;$('refresh').disabled=true;$('seasonSelect').disabled=true;$('pollSelect').disabled=true;notice('');status('Connecting to Supabase…');
+ resetRanks('Loading live data…');$('awards').innerHTML='';$('awardEmpty').hidden=false;$('awardEmpty').textContent='Loading live data…';
+ try{
+  seasons=await get('season',{select:'season_id,year',order:'year.desc,season_id.asc'});if(version!==loadVersion)return;
+  if(!seasons.length){$('seasonSelect').innerHTML='<option>No seasons visible</option>';$('pollSelect').innerHTML='<option>No polls visible</option>';resetRanks('No records are visible to this website.');$('awardEmpty').textContent='No records are visible to this website.';status('Supabase responded · zero visible seasons');notice('The database connection responded, but no seasons are visible. If records exist in Supabase, check that public read policies are enabled. This page does not substitute sample data.');return;}
+  $('seasonSelect').innerHTML=seasons.map(s=>`<option value="${s.season_id}">${s.year}</option>`).join('');if(seasons.some(s=>String(s.season_id)===previous))$('seasonSelect').value=previous;
+  $('seasonSelect').disabled=false;await selectSeason();
+ }catch(error){if(version===loadVersion){resetRanks('Unable to load data.');$('awardEmpty').textContent='Unable to load data.';fail(error);}}
+ finally{if(version===loadVersion)$('refresh').disabled=false;}
+}
+$('seasonSelect').addEventListener('change',selectSeason);$('pollSelect').addEventListener('change',selectPoll);$('teamSearch').addEventListener('input',renderRanks);$('refresh').addEventListener('click',initialize);
+$('copySql').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('sql').textContent);$('copySql').textContent='Copied';setTimeout(()=>$('copySql').textContent='Copy selected-poll SQL',2000);}catch{notice('Select and copy the SQL text below manually.');}});
+initialize();
+</script></body></html>
